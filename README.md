@@ -76,9 +76,9 @@ npm test
 ```
 
 ### Verified Test Cases:
-1. **Initial Valid Scan**: Elena Vance scans &rarr; 202 Accepted &rarr; 2.5s vendor queue &rarr; Webhook delivered &rarr; `CHECKED_IN`.
-2. **Duplicate Scan Protection**: Elena Vance scans again &rarr; 409 Conflict blocked with clear notice.
-3. **Concurrent Multi-Attendee Scans**: Marcus Holloway & Aria Sterling scanned simultaneously &rarr; both enqueued & processed safely.
+1. **Initial Valid Scan**: Dr. Wanjiku Muthoni scans &rarr; 202 Accepted &rarr; 2.5s vendor queue &rarr; Webhook delivered &rarr; `CHECKED_IN`.
+2. **Duplicate Scan Protection**: Dr. Wanjiku Muthoni scans again &rarr; 409 Conflict blocked with clear notice.
+3. **Concurrent Multi-Attendee Scans**: Brian Kipchumba & Faith Mwangi scanned simultaneously &rarr; both enqueued & processed safely.
 4. **Idempotent Webhook Delivery**: Redundant webhook callback sent &rarr; 200 OK returned safely without state corruption.
 
 ---

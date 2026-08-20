@@ -65,7 +65,7 @@ async function runTestSuite() {
     // -------------------------------------------------------------------------
     // TEST 1: Attendee 1 First Valid Scan & Async Webhook Completion
     // -------------------------------------------------------------------------
-    console.log(`\n${ANSI.cyan}▶ [TEST 1] Testing Initial Valid Scan (Dr. Elena Vance)...${ANSI.reset}`);
+    console.log(`\n${ANSI.cyan}▶ [TEST 1] Testing Initial Valid Scan (Dr. Wanjiku Muthoni)...${ANSI.reset}`);
     const scan1Res = await fetch(`${BASE_URL}/api/kiosk/scan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -86,18 +86,18 @@ async function runTestSuite() {
     // Verify attendee is now CHECKED_IN
     const attListRes = await fetch(`${BASE_URL}/api/attendees`);
     const attListData = await attListRes.json();
-    const elena = attListData.attendees.find((a) => a.id === "att_001");
+    const wanjiku = attListData.attendees.find((a) => a.id === "att_001");
 
-    if (elena && elena.status === "CHECKED_IN" && elena.checkedInAt) {
-      pass(`Webhook callback confirmed! Elena Vance transitioned to CHECKED_IN at ${elena.checkedInAt}`);
+    if (wanjiku && wanjiku.status === "CHECKED_IN" && wanjiku.checkedInAt) {
+      pass(`Webhook callback confirmed! Dr. Wanjiku Muthoni transitioned to CHECKED_IN at ${wanjiku.checkedInAt}`);
     } else {
-      fail(`Elena Vance status is ${elena?.status}, expected CHECKED_IN.`);
+      fail(`Dr. Wanjiku Muthoni status is ${wanjiku?.status}, expected CHECKED_IN.`);
     }
 
     // -------------------------------------------------------------------------
-    // TEST 2: Duplicate Scan Protection (Elena Vance Scanned Again)
+    // TEST 2: Duplicate Scan Protection (Dr. Wanjiku Muthoni Scanned Again)
     // -------------------------------------------------------------------------
-    console.log(`\n${ANSI.cyan}▶ [TEST 2] Testing Duplicate Scan Protection (Elena Vance)...${ANSI.reset}`);
+    console.log(`\n${ANSI.cyan}▶ [TEST 2] Testing Duplicate Scan Protection (Dr. Wanjiku Muthoni)...${ANSI.reset}`);
     const dupScanRes = await fetch(`${BASE_URL}/api/kiosk/scan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -113,10 +113,10 @@ async function runTestSuite() {
     }
 
     // -------------------------------------------------------------------------
-    // TEST 3: Multi-Attendee Concurrent Scanning (Marcus & Aria)
+    // TEST 3: Multi-Attendee Concurrent Scanning (Brian & Faith)
     // -------------------------------------------------------------------------
-    console.log(`\n${ANSI.cyan}▶ [TEST 3] Testing Multi-Attendee Check-in (Marcus Holloway & Aria Sterling)...${ANSI.reset}`);
-    const [marcusRes, ariaRes] = await Promise.all([
+    console.log(`\n${ANSI.cyan}▶ [TEST 3] Testing Multi-Attendee Check-in (Brian Kipchumba & Faith Mwangi)...${ANSI.reset}`);
+    const [brianRes, faithRes] = await Promise.all([
       fetch(`${BASE_URL}/api/kiosk/scan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -129,7 +129,7 @@ async function runTestSuite() {
       })
     ]);
 
-    if (marcusRes.status === 202 && ariaRes.status === 202) {
+    if (brianRes.status === 202 && faithRes.status === 202) {
       pass("Both concurrent scans accepted with HTTP 202 Accepted and queued.");
     } else {
       fail("Concurrent scan requests failed.");
@@ -140,13 +140,13 @@ async function runTestSuite() {
 
     const attListRes2 = await fetch(`${BASE_URL}/api/attendees`);
     const attListData2 = await attListRes2.json();
-    const marcus = attListData2.attendees.find((a) => a.id === "att_002");
-    const aria = attListData2.attendees.find((a) => a.id === "att_003");
+    const brian = attListData2.attendees.find((a) => a.id === "att_002");
+    const faith = attListData2.attendees.find((a) => a.id === "att_003");
 
-    if (marcus?.status === "CHECKED_IN" && aria?.status === "CHECKED_IN") {
-      pass(`Both attendees completed check-in: Marcus (${marcus.status}), Aria (${aria.status}).`);
+    if (brian?.status === "CHECKED_IN" && faith?.status === "CHECKED_IN") {
+      pass(`Both attendees completed check-in: Brian (${brian.status}), Faith (${faith.status}).`);
     } else {
-      fail(`Expected both to be CHECKED_IN. Marcus: ${marcus?.status}, Aria: ${aria?.status}`);
+      fail(`Expected both to be CHECKED_IN. Brian: ${brian?.status}, Faith: ${faith?.status}`);
     }
 
     // -------------------------------------------------------------------------
@@ -157,8 +157,8 @@ async function runTestSuite() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        jobId: marcus.printJobId,
-        attendeeId: marcus.id,
+        jobId: brian.printJobId,
+        attendeeId: brian.id,
         status: "SUCCESS",
         vendorTimestamp: new Date().toISOString()
       })
