@@ -1,0 +1,27 @@
+{
+  "name": "solstice-events-kiosk",
+  "version": "1.0.0",
+  "description": "Solstice Events Co. - Asynchronous Kiosk Check-In with Mock Queue & Webhooks",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node tests/test-scenarios.js",
+    "test:sim": "node tests/test-scenarios.js"
+  },
+  "keywords": [
+    "solstice-events",
+    "kiosk",
+    "check-in",
+    "webhook",
+    "async-queue",
+    "idempotency"
+  ],
+  "author": "Solstice Events Engineering",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

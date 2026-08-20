@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solstice Events Co. | Async Kiosk Check-In</title>
+  <meta name="description" content="Solstice Events Co. Asynchronous Kiosk Check-In & Badge Printing System with Event-Driven Queue and Webhook Architecture.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- TOP NAVIGATION & BRANDING -->
+    <header class="kiosk-header">
+      <div class="brand-group">
+        <div class="logo-mark">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="14" stroke="url(#solstice_grad)" stroke-width="2.5" stroke-dasharray="4 2"/>
+            <circle cx="18" cy="18" r="8" fill="url(#solstice_grad)"/>
+            <path d="M18 2V8M18 28V34M2 18H8M28 18H34" stroke="url(#solstice_grad)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="solstice_grad" x1="2" y1="2" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#f472b6" />
+                <stop offset="0.5" stop-color="#c084fc" />
+                <stop offset="1" stop-color="#ec4899" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">SOLSTICE EVENTS CO.</div>
+          <div class="brand-subtitle">Tech Summit 2026 &bull; Asynchronous Kiosk Check-In Hub</div>
+        </div>
+      </div>
+
+      <!-- KIOSK SYSTEM METRICS -->
+      <div class="header-status-bar">
+        <div class="system-badge" id="connection-status">
+          <span class="pulse-dot"></span>
+          <span class="status-label">SSE Live Stream Active</span>
+        </div>
+
+        <div class="kiosk-metrics">
+          <div class="metric-pill">
+            <span class="metric-num" id="stat-total">0</span>
+            <span class="metric-label">Attendees</span>
+          </div>
+          <div class="metric-pill pill-checked">
+            <span class="metric-num" id="stat-checked">0</span>
+            <span class="metric-label">Checked In</span>
+          </div>
+          <div class="metric-pill pill-pending">
+            <span class="metric-num" id="stat-pending">0</span>
+            <span class="metric-label">In Queue (2.5s)</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-reset-db" class="btn-secondary" title="Reset all check-in states to start fresh">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset System
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN TWO-COLUMN WORKSPACE -->
+    <main class="kiosk-grid">
+      <!-- LEFT COLUMN: SCAN STATION & ACTIVE BADGE DISPENSER -->
+      <section class="kiosk-station-panel">
+        <div class="panel-header">
+          <div class="station-tag">KIOSK STATION #04</div>
+          <h2 class="panel-title">Attendee Scan & Badge Dispenser</h2>
+          <p class="panel-desc">Present your QR ticket or select an attendee below. Atomic queue locks prevent duplicate badge printing.</p>
+        </div>
+
+        <!-- SCANNER ZONE -->
+        <div class="scan-card">
+          <div class="scanner-viewfinder" id="scanner-viewfinder">
+            <div class="laser-beam" id="scanner-laser"></div>
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+
+            <div class="viewfinder-content" id="viewfinder-state">
+              <div class="scan-icon-wrapper">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                  <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                  <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                  <circle cx="17.5" cy="17.5" r="2.5" fill="currentColor"></circle>
+                </svg>
+              </div>
+              <div class="viewfinder-title" id="scan-status-title">Ready for QR Ticket</div>
+              <div class="viewfinder-subtitle" id="scan-status-sub">Scan camera active or choose preset attendee below</div>
+            </div>
+          </div>
+
+          <!-- SCAN INPUT / FORM -->
+          <form id="scan-form" class="scan-input-group">
+            <input 
+              type="text" 
+              id="ticket-input" 
+              class="scan-input" 
+              placeholder="Enter Ticket ID (e.g., SOL-2026-VIP-8821)..." 
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="btn-scan" id="btn-submit-scan">
+              <span>SCAN TICKET</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </form>
+
+          <!-- QUICK TEST SCAN PRESETS -->
+          <div class="quick-presets">
+            <div class="presets-label">Quick Test Scans (Click to Simulate Instant Scan):</div>
+            <div class="preset-buttons-row" id="preset-buttons">
+              <!-- Dynamically populated from seeds -->
+            </div>
+          </div>
+
+          <!-- NOTICE / BANNER MESSAGE -->
+          <div id="status-alert" class="status-alert hidden"></div>
+        </div>
+
+        <!-- THERMAL BADGE DISPENSER DISPLAY -->
+        <div class="badge-dispenser-zone">
+          <div class="dispenser-header">
+            <span class="dispenser-title">Thermal Badge Output Slot</span>
+            <span class="printer-status" id="printer-device-tag">
+              <span class="printer-led"></span> Zebra ZD621 Ready
+            </span>
+          </div>
+
+          <div class="badge-slot-housing">
+            <!-- VIRTUAL PHYSICAL BADGE -->
+            <div class="physical-badge" id="badge-element">
+              <div class="badge-lanyard-hole"></div>
+              <div class="badge-header-strip">
+                <span class="badge-conf-name">SOLSTICE 2026</span>
+                <span class="badge-tier-tag" id="badge-tier">VIP SPEAKER</span>
+              </div>
+              <div class="badge-body">
+                <div class="badge-avatar-frame">
+                  <img id="badge-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=elena" alt="Attendee Avatar">
+                </div>
+                <div class="badge-attendee-details">
+                  <div class="badge-name" id="badge-name">Dr. Elena Vance</div>
+                  <div class="badge-role" id="badge-role">Keynote Speaker</div>
+                  <div class="badge-company" id="badge-company">Vance Quantum Systems</div>
+                </div>
+              </div>
+              <div class="badge-footer">
+                <div class="badge-barcode">
+                  <div class="barcode-lines"></div>
+                  <span class="barcode-text" id="badge-ticket-num">SOL-2026-VIP-8821</span>
+                </div>
+                <div class="badge-qr-box">
+                  <div class="qr-grid"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PRINTING OVERLAY EFFECT -->
+            <div class="printing-overlay" id="printing-overlay">
+              <div class="print-spinner"></div>
+              <div class="print-text">PRINTING BADGE...</div>
+              <div class="print-subtext">Vendor delay: 2.5s simulating thermal transfer</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: ATTENDEE ROSTER & LIVE EVENT TELEMETRY -->
+      <section class="kiosk-roster-panel">
+        <!-- ATTENDEE ROSTER -->
+        <div class="roster-card">
+          <div class="roster-header">
+            <div>
+              <h3 class="card-title">Attendee Roster & Live State</h3>
+              <div class="card-subtitle">Real-time status transitions: Scanning &rarr; Print Pending &rarr; Checked In</div>
+            </div>
+            
+            <div class="roster-filter-tabs">
+              <button class="filter-tab active" data-filter="ALL">ALL</button>
+              <button class="filter-tab" data-filter="NOT_CHECKED_IN">UNCHECKED</button>
+              <button class="filter-tab" data-filter="PENDING_PRINT">QUEUE</button>
+              <button class="filter-tab" data-filter="CHECKED_IN">CHECKED IN</button>
+            </div>
+          </div>
+
+          <div class="attendee-list" id="attendee-list">
+            <!-- Dynamically populated attendee cards -->
+          </div>
+        </div>
+
+        <!-- LIVE EVENT TELEMETRY / TERMINAL LOGS -->
+        <div class="terminal-card">
+          <div class="terminal-header">
+            <div class="terminal-title-group">
+              <span class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
+              <span class="terminal-title">Kiosk Event & Webhook Telemetry</span>
+            </div>
+            <div class="terminal-actions">
+              <button class="btn-clear-logs" id="btn-clear-logs">Clear Logs</button>
+            </div>
+          </div>
+          <div class="terminal-body" id="terminal-logs">
+            <!-- Real-time log entries -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
