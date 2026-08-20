@@ -82,6 +82,51 @@ const SEED_ATTENDEES = [
     checkedInAt: null,
     printJobId: null,
     printAttempts: 0
+  },
+  {
+    id: "att_006",
+    ticketId: "SOL-2026-VIP-5541",
+    name: "Ann Njeri Wangui",
+    email: "ann.wangui@solstice.co.ke",
+    company: "Silicon Savannah DevOps",
+    role: "Principal Cloud Architect",
+    tier: "VIP Executive",
+    avatarSeed: "ann-njeri",
+    status: "NOT_CHECKED_IN",
+    badgeType: "Holographic VIP",
+    checkedInAt: null,
+    printJobId: null,
+    printAttempts: 0
+  },
+  {
+    id: "att_007",
+    ticketId: "SOL-2026-DEV-6019",
+    name: "Dennis Kiprop Rotich",
+    email: "dennis.rotich@kopokopo.ke",
+    company: "Kopo Kopo Payments",
+    role: "Senior Distributed Engineer",
+    tier: "All-Access Pass",
+    avatarSeed: "dennis",
+    status: "NOT_CHECKED_IN",
+    badgeType: "Standard Conference",
+    checkedInAt: null,
+    printJobId: null,
+    printAttempts: 0
+  },
+  {
+    id: "att_008",
+    ticketId: "SOL-2026-VIP-4290",
+    name: "Amina Hassan Ali",
+    email: "amina.ali@mpesa-africa.com",
+    company: "M-Pesa Global Fintech",
+    role: "Director of Digital Payments",
+    tier: "VIP Speaker",
+    avatarSeed: "amina",
+    status: "NOT_CHECKED_IN",
+    badgeType: "Holographic VIP",
+    checkedInAt: null,
+    printJobId: null,
+    printAttempts: 0
   }
 ];
 

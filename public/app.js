@@ -132,7 +132,7 @@ function updateMetrics(stats) {
 
 function renderPresets() {
   presetButtonsContainer.innerHTML = "";
-  attendees.slice(0, 4).forEach((att) => {
+  attendees.slice(0, 5).forEach((att) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-btn";
