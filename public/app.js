@@ -6,7 +6,8 @@
  * - Ticket scanning & duplicate error banners
  * - Dynamic Badge Renderer & Thermal Print Animation
  * - Real-Time Attendee Roster & Filter Tabs
- * - Live Event Log Telemetry
+ * - Live System Activity Feed & Telemetry
+ * - Interactive Emerald Glow Action Feedback
  */
 
 let attendees = [];
@@ -23,11 +24,13 @@ const attendeeListContainer = document.getElementById("attendee-list");
 const terminalLogs = document.getElementById("terminal-logs");
 const btnClearLogs = document.getElementById("btn-clear-logs");
 const btnResetDb = document.getElementById("btn-reset-db");
+const liveTimeDisplay = document.getElementById("live-time-display");
 
 // Metrics
 const statTotal = document.getElementById("stat-total");
 const statChecked = document.getElementById("stat-checked");
 const statPending = document.getElementById("stat-pending");
+const statCheckedRate = document.getElementById("stat-checked-rate");
 
 // Badge Elements
 const badgeElement = document.getElementById("badge-element");
@@ -40,6 +43,38 @@ const badgeTicketNum = document.getElementById("badge-ticket-num");
 const printingOverlay = document.getElementById("printing-overlay");
 const scanStatusTitle = document.getElementById("scan-status-title");
 const scanStatusSub = document.getElementById("scan-status-sub");
+
+// -----------------------------------------------------------------------------
+// Live Clock
+// -----------------------------------------------------------------------------
+function updateLiveClock() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("en-KE", { hour12: false });
+  if (liveTimeDisplay) {
+    liveTimeDisplay.textContent = `${timeStr} EAT`;
+  }
+}
+setInterval(updateLiveClock, 1000);
+updateLiveClock();
+
+// -----------------------------------------------------------------------------
+// Interactive Emerald Glow Feedback
+// -----------------------------------------------------------------------------
+function triggerInteractiveFlash() {
+  // Flash badge card
+  if (badgeElement) {
+    badgeElement.classList.remove("flash-emerald");
+    void badgeElement.offsetWidth; // force reflow
+    badgeElement.classList.add("flash-emerald");
+  }
+
+  // Flash ticket input
+  if (ticketInput) {
+    ticketInput.classList.remove("flash-input-emerald");
+    void ticketInput.offsetWidth; // force reflow
+    ticketInput.classList.add("flash-input-emerald");
+  }
+}
 
 // -----------------------------------------------------------------------------
 // Initialize App & SSE Stream
@@ -125,20 +160,30 @@ function updateOrInsertAttendee(updated) {
 // -----------------------------------------------------------------------------
 function updateMetrics(stats) {
   if (!stats) return;
-  statTotal.textContent = stats.total ?? attendees.length;
-  statChecked.textContent = stats.checkedIn ?? 0;
-  statPending.textContent = stats.pendingPrint ?? 0;
+  const total = stats.total ?? attendees.length;
+  const checked = stats.checkedIn ?? 0;
+  const pending = stats.pendingPrint ?? 0;
+
+  if (statTotal) statTotal.textContent = total;
+  if (statChecked) statChecked.textContent = checked;
+  if (statPending) statPending.textContent = pending;
+
+  if (statCheckedRate && total > 0) {
+    const pct = Math.round((checked / total) * 100);
+    statCheckedRate.textContent = `${pct}% Badges Printed`;
+  }
 }
 
 function renderPresets() {
   presetButtonsContainer.innerHTML = "";
-  attendees.slice(0, 5).forEach((att) => {
+  attendees.slice(0, 6).forEach((att) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-btn";
     btn.innerHTML = `<span class="preset-dot"></span><span>${att.name.split(" ")[0]} (${att.ticketId.split("-")[2]})</span>`;
     btn.addEventListener("click", () => {
       ticketInput.value = att.ticketId;
+      triggerInteractiveFlash();
       triggerScan(att.ticketId);
     });
     presetButtonsContainer.appendChild(btn);
@@ -154,7 +199,7 @@ function renderAttendees() {
   });
 
   if (filtered.length === 0) {
-    attendeeListContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 24px; font-size: 0.85rem;">No attendees matching "${currentFilter}" filter.</div>`;
+    attendeeListContainer.innerHTML = `<div style="text-align: center; color: var(--text-slate-subtle); padding: 24px; font-size: 0.85rem;">No attendees matching "${currentFilter}" filter.</div>`;
     return;
   }
 
@@ -188,6 +233,7 @@ function renderAttendees() {
 
     row.addEventListener("click", () => {
       ticketInput.value = att.ticketId;
+      triggerInteractiveFlash();
       updateBadgePreview(att);
     });
 
@@ -217,7 +263,7 @@ function setPrintingState(att, isPrinting) {
     if (activePrintingAttendeeId === att.id) {
       printingOverlay.classList.remove("active");
       scanStatusTitle.textContent = "Ready for Next QR Ticket";
-      scanStatusSub.textContent = "Scan camera active or choose preset attendee below";
+      scanStatusSub.textContent = "Scan camera active or choose preset Kenyan attendee below";
       activePrintingAttendeeId = null;
     }
   }
@@ -228,6 +274,7 @@ function showBadgeEjection(att) {
   badgeElement.classList.remove("eject-badge");
   void badgeElement.offsetWidth; // Force reflow
   badgeElement.classList.add("eject-badge");
+  triggerInteractiveFlash();
   showAlert(`🎉 <strong>${att.name}</strong> successfully checked in! Badge printed and ejected.`, "success");
 }
 
@@ -254,6 +301,7 @@ function showAlert(message, type = "success") {
 async function triggerScan(ticketId) {
   if (!ticketId) return;
 
+  triggerInteractiveFlash();
   btnSubmitScan.disabled = true;
   btnSubmitScan.innerHTML = `<span>CHECKING...</span>`;
 
@@ -301,9 +349,9 @@ document.querySelectorAll(".filter-tab").forEach((tab) => {
   });
 });
 
-// Terminal Log Stream
+// Live System Activity Feed Stream
 function appendTerminalLog(tag, message, timestamp) {
-  const cleanTag = tag.replace(/[\[\]]/g, "");
+  const cleanTag = tag.replace(/[\[\]]/g, "").replace(/\s+/g, "_");
   const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
 
   const entry = document.createElement("div");
