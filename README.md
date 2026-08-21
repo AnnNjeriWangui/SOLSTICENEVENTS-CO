@@ -120,5 +120,7 @@ npm test
 ---
 
 ## 🎨 Theme & Styling
-* **Palette**: Deep Eggplant (`#0a040f`, `#13071a`, `#1c0b26`), Rich Plum (`#280f37`, `#8c1d6b`, `#b8268c`), Neon Accents (`#e03ba8`, `#d8b4fe`).
+* **Theme**: Obsidian & Charcoal Slate with High-Contrast Emerald Green Accents.
+* **Palette**: Obsidian Base (`#080c14`), Dark Charcoal Slate (`#0d121d`, `#151d2d`), Slate Borders (`#232f46`), Emerald Green Accents (`#10b981`, `#34d399`, `#6ee7b7`), Soft Slate Typography (`#f8fafc`, `#e2e8f0`, `#cbd5e1`, `#94a3b8`).
 * **Typography**: Plus Jakarta Sans & JetBrains Mono.
+* **Interactive Feedback**: Instant emerald glow flash confirmation on quick scan actions and thermal badge ejection.
