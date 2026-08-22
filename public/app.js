@@ -40,9 +40,62 @@ const badgeName = document.getElementById("badge-name");
 const badgeRole = document.getElementById("badge-role");
 const badgeCompany = document.getElementById("badge-company");
 const badgeTicketNum = document.getElementById("badge-ticket-num");
+const badgeQrImg = document.getElementById("badge-qr-img");
 const printingOverlay = document.getElementById("printing-overlay");
 const scanStatusTitle = document.getElementById("scan-status-title");
 const scanStatusSub = document.getElementById("scan-status-sub");
+
+// QR Pass Modal Elements
+const qrModalBackdrop = document.getElementById("qr-modal-backdrop");
+const btnCloseQrModal = document.getElementById("btn-close-qr-modal");
+const btnModalDirectScan = document.getElementById("btn-modal-direct-scan");
+const modalAvatar = document.getElementById("modal-avatar");
+const modalName = document.getElementById("modal-name");
+const modalMeta = document.getElementById("modal-meta");
+const modalQrImg = document.getElementById("modal-qr-img");
+const modalTicketId = document.getElementById("modal-ticket-id");
+let modalCurrentAttendee = null;
+
+// Helper: Ensure every attendee has a high-res scannable QR Code URL
+function getAttendeeQrUrl(ticketId) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(ticketId)}&color=8B2FC9&bgcolor=FFFFFF&margin=4`;
+}
+
+function openQrPassModal(att) {
+  if (!att) return;
+  modalCurrentAttendee = att;
+  modalName.textContent = att.name;
+  modalMeta.textContent = `${att.tier} • ${att.role} • ${att.company}`;
+  modalTicketId.textContent = att.ticketId;
+  modalAvatar.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${att.avatarSeed || att.id}`;
+  modalQrImg.src = att.qrCode || getAttendeeQrUrl(att.ticketId);
+  qrModalBackdrop.classList.add("active");
+}
+
+function closeQrPassModal() {
+  qrModalBackdrop.classList.remove("active");
+  modalCurrentAttendee = null;
+}
+
+if (btnCloseQrModal) {
+  btnCloseQrModal.addEventListener("click", closeQrPassModal);
+}
+if (qrModalBackdrop) {
+  qrModalBackdrop.addEventListener("click", (e) => {
+    if (e.target === qrModalBackdrop) closeQrPassModal();
+  });
+}
+if (btnModalDirectScan) {
+  btnModalDirectScan.addEventListener("click", () => {
+    if (modalCurrentAttendee) {
+      const ticketToScan = modalCurrentAttendee.ticketId;
+      closeQrPassModal();
+      ticketInput.value = ticketToScan;
+      triggerInteractiveFlash();
+      triggerScan(ticketToScan);
+    }
+  });
+}
 
 // -----------------------------------------------------------------------------
 // Live Clock
@@ -99,7 +152,10 @@ function initSSE() {
 function handleServerEvent(data) {
   switch (data.type) {
     case "INIT":
-      attendees = data.attendees || [];
+      attendees = (data.attendees || []).map(a => ({
+        ...a,
+        qrCode: a.qrCode || getAttendeeQrUrl(a.ticketId)
+      }));
       updateMetrics(data.stats);
       renderPresets();
       renderAttendees();
@@ -130,7 +186,10 @@ function handleServerEvent(data) {
       break;
 
     case "RESET_COMPLETED":
-      attendees = data.attendees || [];
+      attendees = (data.attendees || []).map(a => ({
+        ...a,
+        qrCode: a.qrCode || getAttendeeQrUrl(a.ticketId)
+      }));
       updateMetrics(data.stats);
       renderPresets();
       renderAttendees();
@@ -147,11 +206,15 @@ function handleServerEvent(data) {
 }
 
 function updateOrInsertAttendee(updated) {
-  const index = attendees.findIndex((a) => a.id === updated.id);
+  const formatted = {
+    ...updated,
+    qrCode: updated.qrCode || getAttendeeQrUrl(updated.ticketId)
+  };
+  const index = attendees.findIndex((a) => a.id === formatted.id);
   if (index >= 0) {
-    attendees[index] = updated;
+    attendees[index] = formatted;
   } else {
-    attendees.push(updated);
+    attendees.push(formatted);
   }
 }
 
@@ -180,7 +243,11 @@ function renderPresets() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-btn";
-    btn.innerHTML = `<span class="preset-dot"></span><span>${att.name.split(" ")[0]} (${att.ticketId.split("-")[2]})</span>`;
+    btn.innerHTML = `
+      <span class="preset-dot"></span>
+      <span>${att.name.split(" ")[0]} (${att.ticketId.split("-")[2]})</span>
+      <svg class="preset-qr-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    `;
     btn.addEventListener("click", () => {
       ticketInput.value = att.ticketId;
       triggerInteractiveFlash();
@@ -213,6 +280,8 @@ function renderAttendees() {
       att.status === "CHECKED_IN" ? "CHECKED IN" :
       att.status === "PENDING_PRINT" ? "PRINTING (2.5s)" : "UNCHECKED";
 
+    const qrUrl = att.qrCode || getAttendeeQrUrl(att.ticketId);
+
     row.innerHTML = `
       <div class="row-left">
         <div class="row-avatar">
@@ -220,10 +289,26 @@ function renderAttendees() {
         </div>
         <div class="row-info">
           <div class="row-name">${att.name}</div>
-          <div class="row-meta">${att.ticketId} &bull; ${att.company}</div>
+          <div class="row-meta">${att.tier} &bull; ${att.company}</div>
+          <div class="row-ticket-tag">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span>${att.ticketId}</span>
+          </div>
         </div>
       </div>
       <div class="row-right">
+        <!-- Interactive QR Code Thumbnail Button -->
+        <button class="btn-qr-view" title="Click to view & scan ${att.name}'s QR Pass" data-ticket="${att.ticketId}">
+          <img class="row-qr-mini" src="${qrUrl}" alt="QR Mini">
+          <span>QR Pass</span>
+        </button>
+
+        <!-- Direct Instant Scan Button -->
+        <button class="btn-instant-scan" title="Scan ${att.ticketId} into Kiosk" data-ticket="${att.ticketId}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <span>Scan</span>
+        </button>
+
         <span class="status-badge ${att.status}">
           ${isPending ? '<span class="pulse-dot" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></span>' : ''}
           ${badgeStatusLabel}
@@ -231,11 +316,34 @@ function renderAttendees() {
       </div>
     `;
 
-    row.addEventListener("click", () => {
+    // Click on row to preview on thermal dispenser
+    row.addEventListener("click", (e) => {
+      // Don't trigger if clicked specific action buttons
+      if (e.target.closest(".btn-qr-view") || e.target.closest(".btn-instant-scan")) return;
       ticketInput.value = att.ticketId;
       triggerInteractiveFlash();
       updateBadgePreview(att);
     });
+
+    // View QR Pass Modal
+    const btnQrView = row.querySelector(".btn-qr-view");
+    if (btnQrView) {
+      btnQrView.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openQrPassModal(att);
+      });
+    }
+
+    // Instant Scan Button
+    const btnInstant = row.querySelector(".btn-instant-scan");
+    if (btnInstant) {
+      btnInstant.addEventListener("click", (e) => {
+        e.stopPropagation();
+        ticketInput.value = att.ticketId;
+        triggerInteractiveFlash();
+        triggerScan(att.ticketId);
+      });
+    }
 
     attendeeListContainer.appendChild(row);
   });
@@ -249,6 +357,9 @@ function updateBadgePreview(att) {
   badgeTier.textContent = att.tier.toUpperCase();
   badgeTicketNum.textContent = att.ticketId;
   badgeAvatar.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${att.avatarSeed || att.id}`;
+  if (badgeQrImg) {
+    badgeQrImg.src = att.qrCode || getAttendeeQrUrl(att.ticketId);
+  }
 }
 
 function setPrintingState(att, isPrinting) {

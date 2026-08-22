@@ -7,10 +7,16 @@
  * - Idempotent completion handlers for printer webhook callbacks.
  */
 
+export const generateQrCodeUrl = (ticketId) => {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketId)}&color=8B2FC9&bgcolor=FFFFFF&margin=4`;
+};
+
 const SEED_ATTENDEES = [
   {
     id: "att_001",
     ticketId: "SOL-2026-VIP-8821",
+    qrCode: generateQrCodeUrl("SOL-2026-VIP-8821"),
+    qrData: "SOL-2026-VIP-8821",
     name: "Dr. Wanjiku Muthoni",
     email: "wanjiku.muthoni@safaricom.co.ke",
     company: "Safaricom AI Research",
@@ -26,6 +32,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_002",
     ticketId: "SOL-2026-DEV-3304",
+    qrCode: generateQrCodeUrl("SOL-2026-DEV-3304"),
+    qrData: "SOL-2026-DEV-3304",
     name: "Brian Kipchumba",
     email: "brian.k@cybersec.co.ke",
     company: "Nairobi CyberSec Hub",
@@ -41,6 +49,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_003",
     ticketId: "SOL-2026-PRS-9120",
+    qrCode: generateQrCodeUrl("SOL-2026-PRS-9120"),
+    qrData: "SOL-2026-PRS-9120",
     name: "Faith Mwangi",
     email: "faith.mwangi@techtrends.ke",
     company: "TechTrends Kenya",
@@ -56,6 +66,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_004",
     ticketId: "SOL-2026-DEV-7749",
+    qrCode: generateQrCodeUrl("SOL-2026-DEV-7749"),
+    qrData: "SOL-2026-DEV-7749",
     name: "Kevin Ochieng",
     email: "kevin.ochieng@moringalabs.ke",
     company: "Moringa Tech Labs",
@@ -71,6 +83,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_005",
     ticketId: "SOL-2026-VIP-1092",
+    qrCode: generateQrCodeUrl("SOL-2026-VIP-1092"),
+    qrData: "SOL-2026-VIP-1092",
     name: "Stacy Nyambura",
     email: "stacy.nyambura@savannah.vc",
     company: "Savannah Tech Ventures",
@@ -86,6 +100,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_006",
     ticketId: "SOL-2026-VIP-5541",
+    qrCode: generateQrCodeUrl("SOL-2026-VIP-5541"),
+    qrData: "SOL-2026-VIP-5541",
     name: "Ann Njeri Wangui",
     email: "ann.wangui@solstice.co.ke",
     company: "Silicon Savannah DevOps",
@@ -101,6 +117,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_007",
     ticketId: "SOL-2026-DEV-6019",
+    qrCode: generateQrCodeUrl("SOL-2026-DEV-6019"),
+    qrData: "SOL-2026-DEV-6019",
     name: "Dennis Kiprop Rotich",
     email: "dennis.rotich@kopokopo.ke",
     company: "Kopo Kopo Payments",
@@ -116,6 +134,8 @@ const SEED_ATTENDEES = [
   {
     id: "att_008",
     ticketId: "SOL-2026-VIP-4290",
+    qrCode: generateQrCodeUrl("SOL-2026-VIP-4290"),
+    qrData: "SOL-2026-VIP-4290",
     name: "Amina Hassan Ali",
     email: "amina.ali@mpesa-africa.com",
     company: "M-Pesa Global Fintech",
@@ -146,7 +166,11 @@ class AttendeeStore {
     this.auditLogs = [];
 
     for (const item of SEED_ATTENDEES) {
-      const copy = { ...item };
+      const copy = { 
+        ...item,
+        qrCode: item.qrCode || generateQrCodeUrl(item.ticketId),
+        qrData: item.ticketId
+      };
       this.attendees.set(copy.id, copy);
       this.ticketIndex.set(copy.ticketId.toUpperCase(), copy.id);
     }

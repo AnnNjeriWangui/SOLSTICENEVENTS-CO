@@ -164,8 +164,8 @@
                   <div class="barcode-lines"></div>
                   <span class="barcode-text" id="badge-ticket-num">SOL-2026-VIP-8821</span>
                 </div>
-                <div class="badge-qr-box">
-                  <div class="qr-grid"></div>
+                <div class="badge-qr-box" title="Scannable Ticket QR Code">
+                  <img id="badge-qr-img" class="badge-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SOL-2026-VIP-8821&color=8B2FC9&bgcolor=FFFFFF&margin=2" alt="Ticket QR">
                 </div>
               </div>
             </div>
@@ -222,8 +222,8 @@
         <div class="roster-card">
           <div class="roster-header">
             <div>
-              <h3 class="card-title">Attendee Roster & Live State</h3>
-              <div class="card-subtitle">Real-time status transitions: Scanning &rarr; Print Pending &rarr; Checked In</div>
+              <h3 class="card-title">Attendee Roster & Scannable QR Passes</h3>
+              <div class="card-subtitle">Every attendee has a generated QR ticket &bull; Click "Scan QR" or view full digital pass</div>
             </div>
             
             <div class="roster-filter-tabs">
@@ -235,7 +235,7 @@
           </div>
 
           <div class="attendee-list" id="attendee-list">
-            <!-- Dynamically populated attendee cards -->
+            <!-- Dynamically populated attendee cards with QR codes -->
           </div>
         </div>
 
@@ -260,6 +260,39 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- ATTENDEE DIGITAL QR PASS MODAL -->
+  <div class="qr-modal-backdrop" id="qr-modal-backdrop">
+    <div class="qr-modal-card">
+      <div class="qr-modal-header">
+        <div class="qr-modal-badge">DIGITAL TICKET PASS &bull; QR CODE</div>
+        <button class="btn-close-modal" id="btn-close-qr-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="qr-modal-body">
+        <div class="qr-modal-avatar-frame">
+          <img id="modal-avatar" src="" alt="Avatar">
+        </div>
+        <h3 class="qr-modal-name" id="modal-name">Attendee Name</h3>
+        <p class="qr-modal-meta" id="modal-meta">Role &bull; Company</p>
+        
+        <div class="qr-code-display-frame">
+          <img id="modal-qr-img" class="modal-qr-code" src="" alt="Attendee QR Code">
+          <div class="qr-code-ticket-id" id="modal-ticket-id">SOL-2026-VIP-8821</div>
+        </div>
+
+        <div class="qr-modal-instructions">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Scannable 2D Barcode &bull; Validated with Solstice Kiosk Hardware</span>
+        </div>
+      </div>
+      <div class="qr-modal-footer">
+        <button class="btn-scan-direct" id="btn-modal-direct-scan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          ⚡ Scan This QR Code Now
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
